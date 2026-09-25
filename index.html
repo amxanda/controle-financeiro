@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+  <title>Finanças Pessoais · Controle de Faturas</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <div class="app">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
+      <div>
+        <h1>💰 Controle Financeiro</h1>
+        <p class="text-muted">Faturas, parcelas, pessoas e caixinhas — tudo em um só lugar.</p>
+      </div>
+      <button class="btn btn-outline btn-sm" id="resetAllBtn" title="Apagar todos os dados salvos">🗑️ Limpar
+        tudo</button>
+    </div>
+
+    <!-- RESUMO -->
+    <div class="summary-panel">
+      <div class="summary-card fatura">
+        <span class="summary-label">📄 Total da fatura</span>
+        <span class="summary-value" id="summaryFatura">R$ 0,00</span>
+      </div>
+      <div class="summary-card dividas">
+        <span class="summary-label">👥 Total a receber</span>
+        <span class="summary-value" id="summaryDividas">R$ 0,00</span>
+      </div>
+      <div class="summary-card bancos">
+        <span class="summary-label">🏦 Total em bancos</span>
+        <span class="summary-value" id="summaryBancos">R$ 0,00</span>
+      </div>
+    </div>
+
+    <!-- SELETOR DE ANO -->
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px; flex-wrap:wrap;">
+      <div class="year-selector">
+        <button class="btn btn-outline btn-sm" id="prevYearBtn" title="Ano anterior">◀</button>
+        <span class="year-label" id="currentYearLabel">2026</span>
+        <button class="btn btn-outline btn-sm" id="nextYearBtn" title="Próximo ano">▶</button>
+      </div>
+      <span class="text-muted" style="font-size:0.85rem;">Selecione o mês e o ano da fatura</span>
+    </div>
+
+    <!-- MESES -->
+    <div class="months-scroll" id="monthsContainer"></div>
+
+    <!-- GRID PRINCIPAL -->
+    <div class="dashboard-grid">
+      <div class="left-column">
+        <!-- FATURA -->
+        <div class="card">
+          <div class="card-header">
+            <h2>📄 Fatura <span id="currentMonthLabel" class="badge">Janeiro 2026</span></h2>
+            <button class="btn btn-sm" id="openAddExpenseBtn">+ Novo gasto</button>
+          </div>
+
+          <div class="fatura-total">
+            <span class="label">Fatura do mês</span>
+            <span class="value" id="faturaTotalValue">R$ 0,00</span>
+          </div>
+
+          <div id="expenseListContainer" class="expense-list"></div>
+        </div>
+      </div>
+
+      <div class="right-column">
+        <!-- PESSOAS -->
+        <div class="card">
+          <div class="card-header">
+            <h2>👥 Gerenciar pessoas</h2>
+            <button class="btn btn-outline btn-sm" id="openAddDebtorBtn">+ Pessoa</button>
+          </div>
+          <div id="debtorChips" class="card-list" style="margin-bottom:12px;"></div>
+          <div id="debtorsContainer"></div>
+        </div>
+
+        <!-- CARTÕES -->
+        <div class="card">
+          <div class="card-header">
+            <h2>💳 Gerenciar cartões</h2>
+            <button class="btn btn-outline btn-sm" id="openAddCardBtn">+ Adicionar</button>
+          </div>
+          <div id="cardManagerList" class="card-list"></div>
+        </div>
+
+        <!-- ASSINATURAS -->
+        <div class="card">
+          <div class="card-header">
+            <h2>📺 Gerenciar assinaturas</h2>
+            <button class="btn btn-outline btn-sm" id="openAddSubscriptionBtn">+ Adicionar</button>
+          </div>
+          <div id="subscriptionChips" class="card-list" style="margin-bottom:12px;"></div>
+          <div class="list-total-box">
+            <span class="label">Total acumulado das assinaturas</span>
+            <span class="value" id="subscriptionTotalValue">R$ 0,00</span>
+          </div>
+          <div id="subscriptionManagerList"></div>
+        </div>
+
+        <!-- BANCOS -->
+        <div class="card">
+          <div class="card-header">
+            <h2>🏦 Bancos e Caixinhas</h2>
+            <button class="btn btn-outline btn-sm" id="openAddBankBtn">+ Banco</button>
+          </div>
+          <div id="banksContainer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================== MODAIS ====================== -->
+
+  <!-- NOVO GASTO -->
+  <div class="modal-overlay" id="expenseModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="expenseModalTitle">Novo gasto</h2>
+        <button class="modal-close" id="closeExpenseModal">&times;</button>
+      </div>
+      <form id="expenseForm">
+        <input type="hidden" id="expenseEditId">
+        <div class="form-group">
+          <label>Nome da compra</label>
+          <input type="text" class="form-control" id="expenseName" required placeholder="Ex: Supermercado">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Valor total (R$)</label>
+            <input type="number" step="0.01" class="form-control" id="expenseTotal" required placeholder="0,00">
+          </div>
+          <div class="form-group">
+            <label>Parcelas</label>
+            <input type="number" min="1" value="1" class="form-control" id="expenseInstallments" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Cartão</label>
+          <select class="form-control" id="expenseCard" required></select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Pessoa (opcional)</label>
+            <select class="form-control" id="expenseDebtor">
+              <option value="">-- Nenhuma --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Assinatura (opcional)</label>
+            <select class="form-control" id="expenseSubscription">
+              <option value="">-- Nenhuma --</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Cor de destaque</label>
+          <input type="color" class="form-control" id="expenseColor" value="#6b4eff"
+            style="height: 48px; padding: 6px;">
+        </div>
+        <button type="submit" class="btn w-full">Salvar gasto</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- DETALHE / PARCELAS -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="detailTitle">Detalhes</h2>
+        <button class="modal-close" id="closeDetailModal">&times;</button>
+      </div>
+      <div id="detailContent" class="installment-detail"></div>
+    </div>
+  </div>
+
+  <!-- CAIXINHA -->
+  <div class="modal-overlay" id="caixinhaModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="caixinhaModalTitle">Nova caixinha</h2>
+        <button class="modal-close" id="closeCaixinhaModal">&times;</button>
+      </div>
+      <form id="caixinhaForm">
+        <input type="hidden" id="caixinhaBankId">
+        <input type="hidden" id="caixinhaIndex">
+        <div class="form-group">
+          <label>Nome da caixinha</label>
+          <input type="text" class="form-control" id="caixinhaNome" required placeholder="Reserva, Viagem...">
+        </div>
+        <div class="form-group">
+          <label>Valor (R$)</label>
+          <input type="number" step="0.01" class="form-control" id="caixinhaValor" required placeholder="0,00">
+        </div>
+        <button type="submit" class="btn w-full">Salvar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- BANCO -->
+  <div class="modal-overlay" id="bankModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Adicionar banco</h2>
+        <button class="modal-close" id="closeBankModal">&times;</button>
+      </div>
+      <form id="bankForm">
+        <div class="form-group">
+          <label>Nome do banco</label>
+          <input type="text" class="form-control" id="bankName" required placeholder="Nubank, PicPay, Inter...">
+        </div>
+        <button type="submit" class="btn w-full">Criar banco</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- CARTÃO -->
+  <div class="modal-overlay" id="cardModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Adicionar cartão</h2>
+        <button class="modal-close" id="closeCardModal">&times;</button>
+      </div>
+      <form id="cardForm">
+        <div class="form-group">
+          <label>Nome do cartão</label>
+          <input type="text" class="form-control" id="cardName" required placeholder="Nubank, Inter, C6...">
+        </div>
+        <button type="submit" class="btn w-full">Criar cartão</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ASSINATURA -->
+  <div class="modal-overlay" id="subscriptionModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="subscriptionModalTitle">Adicionar assinatura</h2>
+        <button class="modal-close" id="closeSubscriptionModal">&times;</button>
+      </div>
+      <form id="subscriptionForm">
+        <input type="hidden" id="subscriptionEditId">
+        <div class="form-group">
+          <label>Nome da assinatura</label>
+          <input type="text" class="form-control" id="subscriptionName" required placeholder="Netflix, Spotify, HBO...">
+        </div>
+        <button type="submit" class="btn w-full">Salvar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- PESSOA -->
+  <div class="modal-overlay" id="debtorModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Adicionar pessoa</h2>
+        <button class="modal-close" id="closeDebtorModal">&times;</button>
+      </div>
+      <form id="debtorForm">
+        <div class="form-group">
+          <label>Nome da pessoa</label>
+          <input type="text" class="form-control" id="debtorName" required placeholder="Ex: João">
+        </div>
+        <button type="submit" class="btn w-full">Criar pessoa</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/script.js"></script>
+</body>
+
+</html>
