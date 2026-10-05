@@ -2,6 +2,7 @@
 const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 const ANO_INICIAL = 2026;
 const STORAGE_KEY = 'controle-financeiro-v1';
+const THEME_KEY = 'controle-financeiro-theme';
 
 // 🎨 Cores de bancos (para Caixinhas)
 const BANK_COLORS = {
@@ -307,44 +308,42 @@ function renderSubscriptions() {
     if (totalBox) totalBox.textContent = formatCurrency(totalGeral);
 
     if (state.subscriptions.length === 0) {
-  chips.innerHTML = '<div class="empty-state" style="padding:8px 0;">Nenhuma assinatura cadastrada.</div>';
-} else {
-  chips.innerHTML = state.subscriptions.map(s =>
-    `<div class="card-chip" style="background:${s.color || '#6b4eff'};">
-      ${s.name}
-      <button data-sub-id="${s.id}" class="delete-sub-chip" title="Excluir">✕</button>
-    </div>`
-  ).join('');
+        chips.innerHTML = '<div class="empty-state" style="padding:8px 0;">Nenhuma assinatura cadastrada.</div>';
+    } else {
+        chips.innerHTML = state.subscriptions.map(s =>
+            `<div class="card-chip" style="background:${s.color || '#6b4eff'};">
+                ${s.name}
+                <button data-sub-id="${s.id}" class="delete-sub-chip" title="Excluir">✕</button>
+            </div>`
+        ).join('');
 
-  // 🔹 Handler de exclusão dos chips
-  chips.querySelectorAll('.delete-sub-chip').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const subId = e.target.dataset.subId;
-      const sub = getSubscription(subId);
-      if (!sub) return;
+        chips.querySelectorAll('.delete-sub-chip').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const subId = e.target.dataset.subId;
+                const sub = getSubscription(subId);
+                if (!sub) return;
 
-      // 🔒 Verifica se há gastos vinculados
-      const vinculados = state.expenses.filter(exp => exp.subscriptionId === subId);
+                const vinculados = state.expenses.filter(exp => exp.subscriptionId === subId);
 
-      if (vinculados.length > 0) {
-        const nomes = vinculados.map(v => `• ${v.name}`).join('\n');
-        alert(
-          `Não é possível excluir "${sub.name}".\n\n` +
-          `Há ${vinculados.length} gasto${vinculados.length === 1 ? '' : 's'} vinculado${vinculados.length === 1 ? '' : 's'}:\n\n` +
-          nomes +
-          `\n\nRemova o vínculo antes de excluir (edite o gasto e escolha outra assinatura ou "Nenhuma").`
-        );
-        return;
-      }
+                if (vinculados.length > 0) {
+                    const nomes = vinculados.map(v => `• ${v.name}`).join('\n');
+                    alert(
+                        `Não é possível excluir "${sub.name}".\n\n` +
+                        `Há ${vinculados.length} gasto${vinculados.length === 1 ? '' : 's'} vinculado${vinculados.length === 1 ? '' : 's'}:\n\n` +
+                        nomes +
+                        `\n\nRemova o vínculo antes de excluir (edite o gasto e escolha outra assinatura ou "Nenhuma").`
+                    );
+                    return;
+                }
 
-      if (confirm(`Excluir a assinatura "${sub.name}"?`)) {
-        state.subscriptions = state.subscriptions.filter(x => x.id !== subId);
-        renderAll();
-      }
-    });
-  });
-}
+                if (confirm(`Excluir a assinatura "${sub.name}"?`)) {
+                    state.subscriptions = state.subscriptions.filter(x => x.id !== subId);
+                    renderAll();
+                }
+            });
+        });
+    }
 
     const ativas = state.subscriptions
         .map(s => ({ ...s, total: acumulado.get(s.id) || 0 }))
@@ -357,17 +356,17 @@ function renderSubscriptions() {
     }
 
     c.innerHTML = ativas.map(s => `
-    <div class="list-item" data-sub-id="${s.id}">
-      <div class="list-name-container">
-        <span class="list-color-dot" style="background:${s.color || '#6b4eff'};"></span>
-        <span class="list-name" data-original-name="${s.name}">${s.name}</span>
-      </div>
-      <span class="list-value sub">${formatCurrency(s.total)}</span>
-      <div class="list-actions">
-        <button class="edit-sub-btn" title="Editar">✎</button>
-      </div>
-    </div>
-  `).join('');
+        <div class="list-item" data-sub-id="${s.id}">
+            <div class="list-name-container">
+                <span class="list-color-dot" style="background:${s.color || '#6b4eff'};"></span>
+                <span class="list-name" data-original-name="${s.name}">${s.name}</span>
+            </div>
+            <span class="list-value sub">${formatCurrency(s.total)}</span>
+            <div class="list-actions">
+                <button class="edit-sub-btn" title="Editar">✎</button>
+            </div>
+        </div>
+    `).join('');
 
     c.querySelectorAll('.edit-sub-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -412,13 +411,13 @@ function renderExpenses() {
         });
 
         html += `
-      <div class="card-group">
-        <div class="card-group-header" style="background:${cardColor};">
-          <span class="card-group-name">💳 ${cardName}</span>
-          <span class="card-group-subtotal">${formatCurrency(subtotal)}</span>
-        </div>
-        <div class="card-group-items">
-    `;
+            <div class="card-group">
+                <div class="card-group-header" style="background:${cardColor};">
+                    <span class="card-group-name">💳 ${cardName}</span>
+                    <span class="card-group-subtotal">${formatCurrency(subtotal)}</span>
+                </div>
+                <div class="card-group-items">
+        `;
 
         exps.forEach(exp => {
             const parcela = getInstallmentValue(exp);
@@ -428,26 +427,26 @@ function renderExpenses() {
 
             let tags = '';
             if (exp.debtor) {
-                tags += `<span class="expense-tag" style="background:#ef4444;">${exp.debtor}</span>`;
+                tags += `<span class="expense-tag">${exp.debtor}</span>`;
             }
             if (sub) {
-                tags += `<span class="expense-tag" style="background:${sub.color || '#6b4eff'};">📺 ${sub.name}</span>`;
+                tags += `<span class="expense-tag">📺 ${sub.name}</span>`;
             }
 
             html += `
-        <div class="expense-item ${pago ? 'paid' : ''}" data-expense-id="${exp.id}" style="border-left-color:${exp.color || cardColor};">
-          <input type="checkbox" class="expense-check" data-expense-id="${exp.id}" ${pago ? 'checked' : ''}>
-          <div class="expense-info">
-            <div class="expense-title-row">
-              <span class="expense-name">${exp.name}</span>
-              ${tags}
-            </div>
-            <div class="text-muted" style="font-size:0.8rem;">Parcela ${parcelaNum} de ${exp.installments}</div>
-          </div>
-          <div class="expense-value">${formatCurrency(parcela)}</div>
-          <button class="expense-delete-btn" data-expense-id="${exp.id}" title="Excluir gasto">🗑️</button>
-        </div>
-      `;
+                <div class="expense-item ${pago ? 'paid' : ''}" data-expense-id="${exp.id}" style="border-left-color:${exp.color || cardColor};">
+                    <input type="checkbox" class="expense-check" data-expense-id="${exp.id}" ${pago ? 'checked' : ''}>
+                    <div class="expense-info">
+                        <div class="expense-title-row">
+                            <span class="expense-name">${exp.name}</span>
+                            ${tags}
+                        </div>
+                        <div class="text-muted" style="font-size:0.8rem;">Parcela ${parcelaNum} de ${exp.installments}</div>
+                    </div>
+                    <div class="expense-value">${formatCurrency(parcela)}</div>
+                    <button class="expense-delete-btn" data-expense-id="${exp.id}" title="Excluir gasto">🗑️</button>
+                </div>
+            `;
         });
 
         html += `</div></div>`;
@@ -496,43 +495,41 @@ function renderDebtors() {
     const map = calculateDebtors();
 
     if (state.debtors.length === 0) {
-  chips.innerHTML = '<div class="empty-state" style="padding:8px 0;">Nenhum devedor cadastrado.</div>';
-} else {
-  chips.innerHTML = state.debtors.map(nome =>
-    `<div class="card-chip neutral">
-      ${nome}
-      <button data-debtor-name="${nome}" class="delete-debtor-chip" title="Excluir">✕</button>
-    </div>`
-  ).join('');
+        chips.innerHTML = '<div class="empty-state" style="padding:8px 0;">Nenhuma pessoa cadastrada.</div>';
+    } else {
+        chips.innerHTML = state.debtors.map(nome =>
+            `<div class="card-chip neutral">
+                ${nome}
+                <button data-debtor-name="${nome}" class="delete-debtor-chip" title="Excluir">✕</button>
+            </div>`
+        ).join('');
 
-  // 🔹 Handler de exclusão dos chips
-  chips.querySelectorAll('.delete-debtor-chip').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const nome = e.target.dataset.debtorName;
-      if (!nome) return;
+        chips.querySelectorAll('.delete-debtor-chip').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const nome = e.target.dataset.debtorName;
+                if (!nome) return;
 
-      // 🔒 Verifica se há gastos vinculados
-      const vinculados = state.expenses.filter(exp => exp.debtor === nome);
+                const vinculados = state.expenses.filter(exp => exp.debtor === nome);
 
-      if (vinculados.length > 0) {
-        const lista = vinculados.map(v => `• ${v.name}`).join('\n');
-        alert(
-          `Não é possível excluir "${nome}".\n\n` +
-          `Há ${vinculados.length} gasto${vinculados.length === 1 ? '' : 's'} vinculado${vinculados.length === 1 ? '' : 's'}:\n\n` +
-          lista +
-          `\n\nRemova o vínculo antes de excluir (edite o gasto e escolha outro devedor ou "Nenhum").`
-        );
-        return;
-      }
+                if (vinculados.length > 0) {
+                    const lista = vinculados.map(v => `• ${v.name}`).join('\n');
+                    alert(
+                        `Não é possível excluir "${nome}".\n\n` +
+                        `Há ${vinculados.length} gasto${vinculados.length === 1 ? '' : 's'} vinculado${vinculados.length === 1 ? '' : 's'}:\n\n` +
+                        lista +
+                        `\n\nRemova o vínculo antes de excluir (edite o gasto e escolha outra pessoa ou "Nenhuma").`
+                    );
+                    return;
+                }
 
-      if (confirm(`Excluir o devedor "${nome}"?`)) {
-        state.debtors = state.debtors.filter(d => d !== nome);
-        renderAll();
-      }
-    });
-  });
-}
+                if (confirm(`Excluir a pessoa "${nome}"?`)) {
+                    state.debtors = state.debtors.filter(d => d !== nome);
+                    renderAll();
+                }
+            });
+        });
+    }
 
     const ativos = Array.from(map.entries())
         .filter(([_, v]) => v > 0)
@@ -544,16 +541,16 @@ function renderDebtors() {
     }
 
     c.innerHTML = ativos.map(([nome, valor]) => `
-    <div class="list-item" data-debtor-name="${nome}">
-      <div class="list-name-container">
-        <span class="list-name" data-original-name="${nome}">${nome}</span>
-      </div>
-      <span class="list-value danger">${formatCurrency(valor)}</span>
-      <div class="list-actions">
-        <button class="edit-debtor-btn" title="Editar nome">✎</button>
-      </div>
-    </div>
-  `).join('');
+        <div class="list-item" data-debtor-name="${nome}">
+            <div class="list-name-container">
+                <span class="list-name" data-original-name="${nome}">${nome}</span>
+            </div>
+            <span class="list-value danger">${formatCurrency(valor)}</span>
+            <div class="list-actions">
+                <button class="edit-debtor-btn" title="Editar nome">✎</button>
+            </div>
+        </div>
+    `).join('');
 
     c.querySelectorAll('.edit-debtor-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -604,26 +601,26 @@ function renderBanks() {
         const total = bank.caixinhas.reduce((a, cx) => a + cx.valor, 0);
         const color = bank.color || getBankColor(bank.name);
         return `
-      <div class="bank-card" style="border-left: 5px solid ${color};">
-        <div class="bank-header">
-          <span class="bank-name" style="color:${color};">${bank.name}</span>
-          <span class="bank-total">${formatCurrency(total)}</span>
-        </div>
-        <div class="caixinha-list">
-          ${bank.caixinhas.map((cx, idx) => `
-            <div class="caixinha-item">
-              <span class="caixinha-nome">${cx.nome}</span>
-              <span class="caixinha-valor">${formatCurrency(cx.valor)}</span>
-              <div class="caixinha-actions">
-                <button class="edit-caixinha" data-bank-id="${bank.id}" data-index="${idx}">✎</button>
-                <button class="delete-caixinha" data-bank-id="${bank.id}" data-index="${idx}">🗑️</button>
-              </div>
+            <div class="bank-card" style="border-left: 5px solid ${color};">
+                <div class="bank-header">
+                    <span class="bank-name">${bank.name}</span>
+                    <span class="bank-total">${formatCurrency(total)}</span>
+                </div>
+                <div class="caixinha-list">
+                    ${bank.caixinhas.map((cx, idx) => `
+                        <div class="caixinha-item">
+                            <span class="caixinha-nome">${cx.nome}</span>
+                            <span class="caixinha-valor">${formatCurrency(cx.valor)}</span>
+                            <div class="caixinha-actions">
+                                <button class="edit-caixinha" data-bank-id="${bank.id}" data-index="${idx}">✎</button>
+                                <button class="delete-caixinha" data-bank-id="${bank.id}" data-index="${idx}">🗑️</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <button class="btn btn-outline btn-sm add-caixinha-btn" data-bank-id="${bank.id}">+ Caixinha</button>
             </div>
-          `).join('')}
-        </div>
-        <button class="btn btn-outline btn-sm add-caixinha-btn" data-bank-id="${bank.id}">+ Caixinha</button>
-      </div>
-    `;
+        `;
     }).join('');
 
     c.querySelectorAll('.edit-caixinha').forEach(btn => {
@@ -683,27 +680,27 @@ function openDetailModal(expense) {
     for (let i = 1; i <= total; i++) {
         const { month, year } = getParcelaMonthYear(expense, i);
         const paga = isMonthlyPaid(expense.id, month, year);
-        lista += `<div style="display:flex; justify-content:space-between; padding:4px 0; font-size:0.85rem; ${paga ? 'color:#94a3b8; text-decoration:line-through;' : ''}">
-      <span>Parcela ${i} — ${MESES[month]}/${year}</span>
-      <span>${formatCurrency(parcela)} ${paga ? '✓' : ''}</span>
-    </div>`;
+        lista += `<div style="display:flex; justify-content:space-between; padding:4px 0; font-size:0.85rem; ${paga ? 'color:var(--text-secondary); text-decoration:line-through;' : ''}">
+            <span>Parcela ${i} — ${MESES[month]}/${year}</span>
+            <span>${formatCurrency(parcela)} ${paga ? '✓' : ''}</span>
+        </div>`;
     }
 
     content.innerHTML = `
-    <div class="installment-row"><span>Valor total</span><strong>${formatCurrency(expense.total)}</strong></div>
-    <div class="installment-row"><span>Valor da parcela</span><strong>${formatCurrency(parcela)}</strong></div>
-    <div class="installment-row"><span>Parcelas pagas</span><strong>${pagas} de ${total}</strong></div>
-    <div class="installment-progress"><div class="installment-progress-bar" style="width:${progresso}%"></div></div>
-    <div class="installment-parcela">Parcela ${atual} de ${total} — ${MESES[prox.month]}/${prox.year}</div>
-    <div class="text-muted" style="text-align:center;">Cartão: ${getCardName(expense.cardId)}</div>
-    ${expense.debtor ? `<div class="text-muted" style="text-align:center;">Devedor: ${expense.debtor}</div>` : ''}
-    ${sub ? `<div class="text-muted" style="text-align:center;">Assinatura: ${sub.name}</div>` : ''}
-    <details style="margin-top:8px;">
-      <summary style="cursor:pointer; font-size:0.85rem; color:var(--accent); font-weight:600;">Ver todas as parcelas</summary>
-      <div style="margin-top:8px; max-height:220px; overflow-y:auto;">${lista}</div>
-    </details>
-    <button class="btn btn-outline btn-sm" id="editExpenseFromDetail" style="margin-top:8px;">✎ Editar gasto</button>
-  `;
+        <div class="installment-row"><span>Valor total</span><strong>${formatCurrency(expense.total)}</strong></div>
+        <div class="installment-row"><span>Valor da parcela</span><strong>${formatCurrency(parcela)}</strong></div>
+        <div class="installment-row"><span>Parcelas pagas</span><strong>${pagas} de ${total}</strong></div>
+        <div class="installment-progress"><div class="installment-progress-bar" style="width:${progresso}%"></div></div>
+        <div class="installment-parcela">Parcela ${atual} de ${total} — ${MESES[prox.month]}/${prox.year}</div>
+        <div class="text-muted" style="text-align:center;">Cartão: ${getCardName(expense.cardId)}</div>
+        ${expense.debtor ? `<div class="text-muted" style="text-align:center;">Pessoa: ${expense.debtor}</div>` : ''}
+        ${sub ? `<div class="text-muted" style="text-align:center;">Assinatura: ${sub.name}</div>` : ''}
+        <details style="margin-top:8px;">
+            <summary style="cursor:pointer; font-size:0.85rem; color:var(--accent); font-weight:600;">Ver todas as parcelas</summary>
+            <div style="margin-top:8px; max-height:220px; overflow-y:auto;">${lista}</div>
+        </details>
+        <button class="btn btn-outline btn-sm" id="editExpenseFromDetail" style="margin-top:8px;">✎ Editar gasto</button>
+    `;
 
     document.getElementById('editExpenseFromDetail').addEventListener('click', () => {
         modal.classList.remove('open');
@@ -732,7 +729,7 @@ function openEditExpenseModal(expense) {
 
     document.getElementById('expenseCard').innerHTML =
         state.cards.map(c => `<option value="${c.id}" ${c.id === expense.cardId ? 'selected' : ''}>${c.name}</option>`).join('');
-    document.getElementById('expenseDebtor').innerHTML = '<option value="">-- Nenhum --</option>' +
+    document.getElementById('expenseDebtor').innerHTML = '<option value="">-- Nenhuma --</option>' +
         state.debtors.map(d => `<option value="${d}" ${d === expense.debtor ? 'selected' : ''}>${d}</option>`).join('');
     document.getElementById('expenseSubscription').innerHTML = '<option value="">-- Nenhuma --</option>' +
         state.subscriptions.map(s => `<option value="${s.id}" ${s.id === expense.subscriptionId ? 'selected' : ''}>${s.name}</option>`).join('');
@@ -759,8 +756,35 @@ function renderAll() {
     saveState();
 }
 
+// ==================== TEMA ====================
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.textContent = theme === 'dark' ? '☀️ Modo claro' : '🌙 Modo escuro';
+}
+
+function initTheme() {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === 'dark' || saved === 'light') {
+        applyTheme(saved);
+    } else {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(prefersDark ? 'dark' : 'light');
+    }
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+        localStorage.setItem(THEME_KEY, next);
+    });
+}
+
 // ==================== INICIALIZAÇÃO ====================
 window.addEventListener('DOMContentLoaded', () => {
+    // Aplica tema antes de renderizar
+    initTheme();
+
     document.getElementById('prevYearBtn').addEventListener('click', () => {
         state.currentYear--;
         renderAll();
@@ -792,7 +816,7 @@ window.addEventListener('DOMContentLoaded', () => {
         document.getElementById('expenseColor').value = '#6b4eff';
         document.getElementById('expenseCard').innerHTML =
             state.cards.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-        document.getElementById('expenseDebtor').innerHTML = '<option value="">-- Nenhum --</option>' +
+        document.getElementById('expenseDebtor').innerHTML = '<option value="">-- Nenhuma --</option>' +
             state.debtors.map(d => `<option value="${d}">${d}</option>`).join('');
         document.getElementById('expenseSubscription').innerHTML = '<option value="">-- Nenhuma --</option>' +
             state.subscriptions.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
@@ -835,7 +859,7 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('closeSubscriptionModal').addEventListener('click', () =>
         document.getElementById('subscriptionModal').classList.remove('open'));
 
-    // DEVEDOR
+    // PESSOA
     document.getElementById('openAddDebtorBtn').addEventListener('click', () => {
         document.getElementById('debtorForm').reset();
         document.getElementById('debtorModal').classList.add('open');
@@ -951,7 +975,7 @@ window.addEventListener('DOMContentLoaded', () => {
         renderAll();
     });
 
-    // SUBMIT DEVEDOR
+    // SUBMIT PESSOA
     document.getElementById('debtorForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const name = document.getElementById('debtorName').value.trim();
