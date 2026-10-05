@@ -5,7 +5,9 @@
     font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
-:root {
+/* ============ TEMA CLARO (padrão) ============ */
+:root,
+[data-theme="light"] {
     --bg: #f5f7fb;
     --card-bg: #ffffff;
     --text-primary: #1e293b;
@@ -15,10 +17,42 @@
     --accent-soft: #ede9fe;
     --success: #10b981;
     --danger: #ef4444;
+
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+
     --radius: 16px;
     --radius-sm: 10px;
+
+    --input-bg: #f8fafc;
+    --hover-bg: #f1f5f9;
+    --item-bg: #fafcff;
+    --bank-bg: #f8fafc;
+    --chip-neutral-bg: #f1f5f9;
+    --overlay-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* ============ TEMA ESCURO ============ */
+[data-theme="dark"] {
+    --bg: #0f172a;
+    --card-bg: #1e293b;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --border-light: #334155;
+    --accent: #8b6eff;
+    --accent-soft: #312e81;
+    --success: #34d399;
+    --danger: #f87171;
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+
+    --input-bg: #0f172a;
+    --hover-bg: #334155;
+    --item-bg: #263449;
+    --bank-bg: #263449;
+    --chip-neutral-bg: #334155;
+    --overlay-bg: rgba(0, 0, 0, 0.6);
 }
 
 body {
@@ -29,6 +63,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    transition: background-color 0.2s, color 0.2s;
 }
 
 .app {
@@ -93,7 +128,7 @@ h2 {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    transition: transform 0.15s, box-shadow 0.15s;
+    transition: transform 0.15s, box-shadow 0.15s, background-color 0.2s;
     position: relative;
     overflow: hidden;
 }
@@ -191,7 +226,7 @@ h2 {
 }
 
 .month-btn:hover {
-    background: #f1f5f9;
+    background: var(--hover-bg);
 }
 
 .month-btn.active {
@@ -230,7 +265,7 @@ h2 {
     padding: 20px;
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--border-light);
-    transition: box-shadow 0.2s;
+    transition: box-shadow 0.2s, background-color 0.2s;
 }
 
 .card:hover {
@@ -280,7 +315,7 @@ h2 {
     border-radius: var(--radius-sm);
     overflow: hidden;
     border: 1px solid var(--border-light);
-    background: #fff;
+    background: var(--card-bg);
 }
 
 .card-group-header {
@@ -313,9 +348,9 @@ h2 {
 .card-group-items .expense-item {
     border-radius: 0;
     border-left-width: 4px;
-    background: #fafcff;
+    background: var(--item-bg);
     box-shadow: none;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border-light);
 }
 
 .card-group-items .expense-item:last-child {
@@ -323,7 +358,7 @@ h2 {
 }
 
 .card-group-items .expense-item:hover {
-    background: #f1f5f9;
+    background: var(--hover-bg);
 }
 
 .expense-item {
@@ -331,7 +366,7 @@ h2 {
     align-items: center;
     gap: 12px;
     padding: 14px 12px;
-    background: #fafcff;
+    background: var(--item-bg);
     border-radius: var(--radius-sm);
     border-left: 6px solid var(--accent);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
@@ -341,7 +376,7 @@ h2 {
 }
 
 .expense-item:hover {
-    background: #f1f5f9;
+    background: var(--hover-bg);
 }
 
 .expense-check {
@@ -377,21 +412,21 @@ h2 {
     padding: 2px 8px;
     border-radius: 30px;
     font-weight: 600;
-    background: #f1f5f9 !important;
+    background: var(--chip-neutral-bg) !important;
     color: var(--text-primary) !important;
 }
 
 .expense-value {
     font-weight: 700;
     font-size: 1.1rem;
-    color: #0f172a;
+    color: var(--text-primary);
     white-space: nowrap;
 }
 
 .expense-delete-btn {
     background: none;
     border: none;
-    color: #cbd5e1;
+    color: var(--text-secondary);
     cursor: pointer;
     font-size: 1.1rem;
     padding: 4px 6px;
@@ -401,20 +436,21 @@ h2 {
 }
 
 .expense-delete-btn:hover {
-    background: #fee2e2;
-    color: #ef4444;
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--danger);
 }
 
 .expense-item.paid .expense-name,
 .expense-item.paid .expense-value,
 .expense-item.paid .expense-tag {
     text-decoration: line-through;
-    color: #94a3b8 !important;
+    color: var(--text-secondary) !important;
+    opacity: 0.7;
 }
 
 .expense-item.paid {
     opacity: 0.75;
-    background: #f8fafc;
+    background: var(--bank-bg);
 }
 
 /* ---------- BOTÕES ---------- */
@@ -448,7 +484,7 @@ h2 {
 }
 
 .btn-outline:hover {
-    background: #f1f5f9;
+    background: var(--hover-bg);
     color: var(--text-primary);
 }
 
@@ -464,7 +500,7 @@ h2 {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--overlay-bg);
     backdrop-filter: blur(3px);
     display: flex;
     align-items: center;
@@ -482,7 +518,8 @@ h2 {
 }
 
 .modal {
-    background: white;
+    background: var(--card-bg);
+    color: var(--text-primary);
     border-radius: 28px;
     max-width: 500px;
     width: 100%;
@@ -491,7 +528,7 @@ h2 {
     padding: 24px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     transform: scale(0.95);
-    transition: transform 0.2s;
+    transition: transform 0.2s, background-color 0.2s;
 }
 
 .modal-overlay.open .modal {
@@ -533,14 +570,15 @@ h2 {
     border: 1px solid var(--border-light);
     border-radius: 12px;
     font-size: 0.95rem;
-    background: #f8fafc;
-    transition: border 0.15s;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    transition: border 0.15s, background-color 0.2s;
 }
 
 .form-control:focus {
     outline: none;
     border-color: var(--accent);
-    background: white;
+    background: var(--card-bg);
     box-shadow: 0 0 0 3px rgba(107, 78, 255, 0.1);
 }
 
@@ -599,14 +637,14 @@ h2 {
     background: rgba(255, 255, 255, 0.4);
 }
 
-/* 🔹 Chip neutro (pessoas) — fundo claro, texto escuro */
+/* Chip neutro (pessoas) — fundo claro, texto escuro */
 .card-chip.neutral {
-    background: #f1f5f9;
+    background: var(--chip-neutral-bg);
     color: var(--text-primary);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
-/* 🔹 ✕ no chip neutro — mesma cor da escrita */
+/* ✕ no chip neutro — mesma cor da escrita */
 .card-chip.neutral button {
     background: transparent;
     color: var(--text-primary);
@@ -653,6 +691,8 @@ h2 {
     font-size: 0.9rem;
     width: 100%;
     max-width: 160px;
+    background: var(--input-bg);
+    color: var(--text-primary);
 }
 
 .list-value {
@@ -679,7 +719,7 @@ h2 {
 }
 
 .list-actions button:hover {
-    background: #f1f5f9;
+    background: var(--hover-bg);
     color: var(--text-primary);
 }
 
@@ -688,7 +728,7 @@ h2 {
 }
 
 .list-actions button.save-btn:hover {
-    background: #dcfce7;
+    background: rgba(16, 185, 129, 0.15);
 }
 
 .list-color-dot {
@@ -720,7 +760,7 @@ h2 {
 
 /* ---------- BANCOS ---------- */
 .bank-card {
-    background: #f8fafc;
+    background: var(--bank-bg);
     border-radius: var(--radius-sm);
     padding: 16px;
     margin-bottom: 16px;
@@ -755,7 +795,7 @@ h2 {
     display: flex;
     align-items: center;
     gap: 8px;
-    background: white;
+    background: var(--card-bg);
     padding: 8px 12px;
     border-radius: 10px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
@@ -788,7 +828,7 @@ h2 {
 }
 
 .caixinha-actions button:hover {
-    background: #f1f5f9;
+    background: var(--hover-bg);
 }
 
 .add-caixinha-btn {
@@ -811,7 +851,7 @@ h2 {
 }
 
 .installment-progress {
-    background: #f1f5f9;
+    background: var(--chip-neutral-bg);
     height: 8px;
     border-radius: 10px;
     overflow: hidden;
